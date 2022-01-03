@@ -1,8 +1,8 @@
 import {
   Connection,
   createConnection,
+  EntityTarget,
   MongoRepository,
-  ObjectType,
 } from "typeorm";
 
 class Database {
@@ -13,7 +13,7 @@ class Database {
   }
 
   public static getRepository<Entity>(
-    target: ObjectType<Entity>
+    target: EntityTarget<Entity>
   ): MongoRepository<Entity> {
     return this.connection.getMongoRepository(target);
   }
