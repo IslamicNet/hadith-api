@@ -1,27 +1,42 @@
 import { Service as AutoInjection } from "typedi";
-import { EntityTarget, MongoRepository } from "typeorm";
+import { MongoRepository } from "typeorm";
 import Database from "../database";
 import Hadith from "./entity/Hadith.entity";
 
-interface IHadith<HadithEntity extends Hadith> {
-  getHadithById(id: string): Promise<HadithEntity>;
+interface IHadith {
+  getHadithByHadithNumber(
+    collectionName: string,
+    hadithNumber: number
+  ): Promise<Hadith>;
 }
 
 @AutoInjection()
-class HadithRepo<HadithEntity extends Hadith> implements IHadith<HadithEntity> {
-  private readonly repo: MongoRepository<HadithEntity>;
+class HadithRepo implements IHadith {
+  private readonly repo: MongoRepository<Hadith>;
 
-  public constructor(entity: EntityTarget<HadithEntity>) {
-    this.repo = Database.getRepository(entity);
+  public constructor() {
+    this.repo = Database.getRepository(Hadith);
+  }
+
+  private setRepositoryCollectionName(collectionName: string) {
+    this.repo.metadata.tableName = collectionName;
   }
 
   /**
-   * Get by id
-   * @param id
+   * Get Hadith by Hadith Number
+   * @param collectionName
+   * @param hadithNumber
    * @returns
    */
-  async getHadithById(id: string): Promise<HadithEntity> {
-    const hadith: HadithEntity = await this.repo.findOne(id);
+  async getHadithByHadithNumber(
+    collectionName: string,
+    hadithNumber: number
+  ): Promise<Hadith> {
+    this.setRepositoryCollectionName(collectionName);
+
+    const hadith: Hadith = await this.repo.findOne({
+      hadithNumber: hadithNumber,
+    });
     return hadith;
   }
 }
