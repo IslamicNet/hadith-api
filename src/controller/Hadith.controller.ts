@@ -1,8 +1,10 @@
 import { plainToClass } from "class-transformer";
 import { Request } from "express";
 import { Service as AutoInjection } from "typedi";
+import GetHadhithBooksDTO from "../dto/request/GetHadithBooks.dto";
 import HadithByNumberDTO from "../dto/request/HadithByNumber.dto";
 import HadithDTO from "../dto/response/Hadith.dto";
+import HadithBooksDTO from "../dto/response/HadithBooks.dto";
 import validateRequest from "../middleware/requestValidator.middleware";
 import HadithService from "../service/Hadith.service";
 import BaseController from "./Base.controller";
@@ -16,15 +18,57 @@ class HadithController extends BaseController {
   protected initializeEndpoints(): void {
     this.addAsyncEndpoint(
       "GET",
-      "/:collectionName/:hadithNumber",
+      "/hadith/:collectionName/:hadithNumber",
       this.getHadithByHadithNumber,
       validateRequest(HadithByNumberDTO)
+    );
+
+    this.addAsyncEndpoint(
+      "GET",
+      "/books/:collectionName",
+      this.getHadithBooks,
+      validateRequest(GetHadhithBooksDTO)
     );
   }
 
   /**
    * @openapi
-   * /{collectionName}/{hadithNumber}:
+   * /books/{collectionName}:
+   *   get:
+   *     tags:
+   *       - Hadith
+   *     summary: Get Hadith books
+   *     parameters:
+   *       - name: collectionName
+   *         in: path
+   *         required: true
+   *         description: Collection Name is a hadith book name
+   *         schema:
+   *           type: string
+   *           enum: ["bukhari", "muslim", "abu_dawud", "ibne_maja", "nasai", "tirmidhi"]
+   *     responses:
+   *       200:
+   *         description: Return Hadith books
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/HadithBooks'
+   */
+  private getHadithBooks = async (req: Request) => {
+    const hadith: GetHadhithBooksDTO = plainToClass(
+      GetHadhithBooksDTO,
+      req.params
+    );
+
+    const books: HadithBooksDTO = await this.hadithService.getHadithBooks(
+      hadith.collectionName
+    );
+    return books;
+  };
+
+  /**
+   * @openapi
+   * /hadith/{collectionName}/{hadithNumber}:
    *   get:
    *     tags:
    *       - Hadith

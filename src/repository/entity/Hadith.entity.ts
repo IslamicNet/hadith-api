@@ -7,6 +7,8 @@ class UrduEnglishText {
 
 @Entity()
 class Hadith {
+  _id: string;
+
   @ObjectIdColumn()
   id: ObjectID | string; // uci will be the default id
 
